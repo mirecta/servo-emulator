@@ -16,31 +16,25 @@ path = "src/main.rs"
 # - This manifest targets an ESP32-S3 board running ESP-IDF via the `esp-idf-sys` crate.
 # - Ensure your local ESP-IDF installation matches the version expected by `esp-idf-sys`.
 # - Default wiring expectations (change in source if you wire differently):
-#     I2C SDA = GPIO21, SCL = GPIO22
+#     I2C SDA = GPIO21, SCL = GPIO20
 #     Servo inputs = GPIO4 and GPIO5
 # - If you want a no-std / esp-hal implementation instead, switch to `esp32s3-hal` and adjust code.
 
 [dependencies]
 # ESP-IDF bindings and HAL for esp-idf-based workflow.
 # Keep versions aligned with your local ESP-IDF installation.
-esp-idf-sys = "0.40"
-esp-idf-hal = "0.40"
+esp-idf-sys = "0.36"
+esp-idf-hal = "0.45"
+esp-idf-svc = { version = "0.51", features = ["binstart"] }
 
-# Display stack
-ssd1306 = { version = "0.8", features = ["graphics"] }
+# Display stack (raw I2C for SH1107)
 embedded-graphics = "0.8"
 
 # Embedded ecosystem
-embedded-hal = "0.2"
-nb = "1.0"
-heapless = "0.7"
+heapless = "0.8"
 
-# Minimal panic handler to keep examples simple; replace during debugging if desired.
-panic-halt = "0.2"
-
-# Optional logging or debug crates can be added as needed
-# log = "0.4"
-# esp-idf-svc = "0.40"
+[build-dependencies]
+embuild = "0.33"
 
 [features]
 default = []

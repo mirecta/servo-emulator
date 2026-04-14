@@ -34,27 +34,32 @@ Prerequisites (host machine)
 
 Note: Ensure your ESP-IDF version is compatible with the `esp-idf-sys` / `esp-idf-hal` crate versions declared in `Cargo.toml`. If you see version mismatch errors when building, either update your local ESP-IDF or align the crate versions.
 
-High-level build & flash workflow
+High-level build & flash (recommended)
 1. Export ESP-IDF environment
-   - Run the ESP-IDF export script provided by your ESP-IDF installation to set environment variables in the current shell session. This is required so the Rust ESP-IDF bindings can locate headers/libraries.
+   - In each shell where you build/flash, run the ESP-IDF export script provided by your ESP-IDF installation. This sets environment variables so the Rust esp-idf bindings can locate headers and native libraries:
+     - Example:
+       - source /path/to/esp-idf/export.sh
 
-2. Build
-   - From the repository root:
-     - Build in release mode:
-       - `cargo build --release`
-   - If the build fails due to missing or incompatible ESP-IDF libs, verify the ESP-IDF installation and make sure the ESP-IDF version matches the crate expectations.
+2. Build & flash in one step (recommended)
+   - Use `cargo-espflash` to build and flash in a single command. This is the simplest workflow:
+     - cargo espflash --chip esp32s3 --release --monitor /dev/ttyUSB0
+   - Replace `/dev/ttyUSB0` with the serial port for your board (on Windows use e.g. `COM3`). The `--monitor` flag opens a serial monitor after flashing.
 
-3. Flash
-   - Use your preferred ESP-IDF-based flashing method or the Rust-flashing helper you're familiar with:
-     - Example sequence:
-       - Put the board in bootloader / programming mode (if required by your board).
-       - Invoke the flash command appropriate to your environment, pointing at the built ELF/firmware artifact in `target/` or using the cargo-based flash helper.
-     - The exact flash command depends on your local tooling. If you use the ESP-IDF Python tooling, there's a `flash` command in the ESP-IDF tooling that can write the built firmware to the chip using a selected serial port.
-     - If you use a cargo-based flashing helper, it typically wraps the same low-level flashing functionality and can also be used.
+3. Build only (optional)
+   - If you prefer to build first and flash separately:
+     - cargo build --release
+   - The compiled firmware will be in a `target/*/release/` directory (artifact name / path may vary by platform and toolchain).
 
-4. Serial logs / debugging
-   - After flashing, open a serial monitor at 115200 baud (or the speed configured by esp-idf in this project) and observe logs (initialization messages, potential `println!` output).
-   - If logs are missing, double-check the serial port and cable, and ensure the board is in the running mode (not in bootloader after flashing).
+4. Flash artifact (optional)
+   - If you built separately and have a flashing tool such as `espflash`, you can flash the built artifact:
+     - espflash /dev/ttyUSB0 path/to/firmware
+   - Adjust the device path and artifact path to match your system.
+
+5. Serial logs / debugging
+   - If you used `--monitor` with `cargo-espflash`, the monitor will already be open.
+   - Otherwise open a serial terminal at 115200 baud (picocom, minicom, screen, or your preferred tool) to view logs and debug prints:
+     - picocom -b 115200 /dev/ttyUSB0
+   - If logs do not appear, verify the serial port, cable, and that the board is running (not stuck in bootloader mode).
 
 Editing pins or mapping
 - To change pins or the pulse-to-degree mapping:
@@ -94,7 +99,8 @@ Extending the project
 - Additional logging: add more `println!` calls to help debug input capture and I2C initialization.
 
 If you want, I can:
-- Add a small helper script with concrete build and flash commands tailored to your host OS.
-- Add an optional serial calibration utility to tune min/max pulse values interactively from the board.
+- Add a calibration utility (serial or on-display) to set `PULSE_MIN_US` / `PULSE_MAX_US` interactively.
+- Add smoothing (e.g. exponential moving average) to stabilize gauge movement.
+- Provide explicit platform-tailored build & flash examples for your OS (Linux / macOS / Windows) showing the exact `cargo-espflash` command to run.
 
-Enjoy — let me know if you want the README expanded with explicit commands for your OS or a helper script to automate build + flash.
+Enjoy — tell me which of the above you want next and I'll add it.
