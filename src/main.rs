@@ -265,6 +265,11 @@ fn main() -> ! {
 
     let p = Peripherals::take().unwrap();
     let cfg = I2cConfig::new().baudrate(Hertz(400_000));
+
+    // ESP32: SDA=GPIO23, SCL=GPIO22 | ESP32-S3: SDA=GPIO21, SCL=GPIO20
+    #[cfg(esp32)]
+    let mut i2c = I2cDriver::new(p.i2c0, p.pins.gpio23, p.pins.gpio22, &cfg).unwrap();
+    #[cfg(esp32s3)]
     let mut i2c = I2cDriver::new(p.i2c0, p.pins.gpio21, p.pins.gpio20, &cfg).unwrap();
 
     init_sh1107(&mut i2c);
