@@ -226,17 +226,6 @@ fn draw_gauge<D: DrawTarget<Color = BinaryColor>>(
             .into_styled(stroke)
             .draw(display);
 
-        // Degree inside arc
-        let mut s: String<16> = String::new();
-        let _ = core::fmt::write(&mut s, format_args!("{}d", deg));
-        let _ = Text::with_alignment(
-            &s,
-            Point::new(cx, cy - 6),
-            text_style,
-            Alignment::Center,
-        )
-        .draw(display);
-
         // Label + raw value below
         let mut s2: String<16> = String::new();
         let _ = core::fmt::write(&mut s2, format_args!("{}", label));
